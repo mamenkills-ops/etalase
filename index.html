@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Etalase Suratin</title>
+<meta name="description" content="Kumpulan produk Shopee pilihan dan terlaris. Klik untuk langsung beli.">
+<meta property="og:title" content="Etalase Suratin">
+<meta property="og:description" content="Produk Shopee pilihan & terlaris, harga hemat.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>">
+<style>
+  :root{
+    --bg:#fff7f4; --card:#ffffff; --text:#1f1f1f; --muted:#6b6b6b;
+    --brand:#ee4d2d; --brand-ink:#ffffff; --line:#f1ddd6; --chip:#fde8e2;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#141212; --card:#1e1b1a; --text:#f3eeec; --muted:#a59d9a;
+      --brand:#ff6a47; --brand-ink:#1a0d09; --line:#332b29; --chip:#3a2621; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+  .wrap{max-width:560px;margin:0 auto;padding:24px 16px 48px}
+  header{text-align:center;margin-bottom:18px}
+  .avatar{width:72px;height:72px;border-radius:50%;margin:0 auto 10px;display:grid;place-items:center;
+    background:var(--brand);color:var(--brand-ink);font-size:34px}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px;margin:0}
+  .search{width:100%;margin:18px 0 6px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);
+    background:var(--card);color:var(--text);font-size:16px}
+  .count{color:var(--muted);font-size:13px;margin:0 0 12px 2px}
+  .list{display:grid;gap:12px}
+  a.item{display:flex;gap:12px;align-items:center;padding:10px;border-radius:14px;background:var(--card);
+    border:1px solid var(--line);text-decoration:none;color:inherit;transition:transform .1s}
+  a.item:active{transform:scale(.98)}
+  .thumb{width:84px;height:84px;flex:none;border-radius:10px;object-fit:cover;background:var(--chip)}
+  .info{min-width:0;flex:1}
+  .name{font-size:14px;font-weight:600;margin:0 0 4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .price{color:var(--brand);font-weight:700;font-size:16px}
+  .sold{display:inline-block;margin-left:6px;font-size:12px;color:var(--muted)}
+  .btn{flex:none;background:var(--brand);color:var(--brand-ink);font-weight:700;font-size:13px;
+    padding:8px 12px;border-radius:999px;white-space:nowrap}
+  footer{margin-top:28px;text-align:center;color:var(--muted);font-size:12px}
+  .empty{text-align:center;color:var(--muted);padding:24px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="avatar" aria-hidden="true">🛍️</div>
+    <h1>Etalase Suratin</h1>
+    <p class="sub">Produk Shopee pilihan &amp; terlaris. Klik produknya, langsung ke Shopee.</p>
+  </header>
+
+  <input class="search" id="q" type="search" placeholder="Cari produk… (mis. parfum, kipas)" aria-label="Cari produk">
+  <p class="count" id="count"></p>
+  <div class="list" id="list"><p class="empty">Memuat produk…</p></div>
+
+  <footer>
+    Halaman ini berisi link affiliate Shopee. Harga &amp; stok mengikuti Shopee.<br>
+    <span id="updated"></span>
+  </footer>
+</div>
+<script>
+  const list = document.getElementById('list');
+  const q = document.getElementById('q');
+  const count = document.getElementById('count');
+  let produk = [];
+
+  function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+  function render(){
+    const term = q.value.trim().toLowerCase();
+    const rows = produk.filter(p => p.nama.toLowerCase().includes(term));
+    count.textContent = rows.length + ' produk';
+    if (!rows.length){ list.innerHTML = '<p class="empty">Produk tidak ditemukan.</p>'; return; }
+    list.innerHTML = rows.map(p => `
+      <a class="item" href="${esc(p.link)}" target="_blank" rel="noopener sponsored">
+        <img class="thumb" src="${esc(p.gambar)}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <div class="info">
+          <p class="name">${esc(p.nama)}</p>
+          <span class="price">${esc(p.harga)}</span>${p.terjual && p.terjual !== '-' ? `<span class="sold">${esc(p.terjual)} terjual</span>` : ''}
+        </div>
+        <span class="btn">Beli</span>
+      </a>`).join('');
+  }
+
+  fetch('produk.json', {cache:'no-store'})
+    .then(r => r.json())
+    .then(d => {
+      produk = d.produk || [];
+      if (d.diperbarui) document.getElementById('updated').textContent = 'Diperbarui ' + d.diperbarui;
+      render();
+    })
+    .catch(() => { list.innerHTML = '<p class="empty">Gagal memuat produk. Coba muat ulang.</p>'; });
+  q.addEventListener('input', render);
+</script>
+</body>
+</html>
